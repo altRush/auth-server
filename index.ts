@@ -12,7 +12,7 @@ let refreshTokens = [] as string[];
 app.post('/token', (req: Request, res: Response) => {
   const refreshToken = req.body.token;
   if (refreshToken == null) return res.sendStatus(401);
-  // if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
+  if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
 
   try {
     const payload = jwt.verify(
@@ -25,7 +25,8 @@ app.post('/token', (req: Request, res: Response) => {
     const accessToken = generateAccessToken({ username });
     res.status(200).json({ accessToken: accessToken });
   } catch (err) {
-    if (err) return res.sendStatus(403);
+    console.log(err);
+    res.sendStatus(403);
   }
 });
 
@@ -39,8 +40,6 @@ interface User {
 }
 
 app.post('/login', (req, res) => {
-  // Authenticate User
-
   const username = req.body.username;
   const user: User = { username };
 
@@ -52,7 +51,9 @@ app.post('/login', (req, res) => {
 });
 
 function generateAccessToken(user: User) {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '15s' });
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '5m' });
 }
 
-app.listen(+process.env.PORT!);
+app.listen(+process.env.PORT!, () => {
+  console.log(`App is listening to port ${process.env.PORT}`);
+});
